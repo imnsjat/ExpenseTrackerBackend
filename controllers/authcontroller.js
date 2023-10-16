@@ -30,12 +30,18 @@ exports.login = (req,res,next)=>{
     if(name.length === 0 || name  == null || password == null || email == null || email.length === 0 || password.length === 0){
         res.status(400).json({err : "bad  parameters"})
     }
-    User.findAll({where: {email:email , password:password}})
+    User.findAll({where: {email:email }})
     .then(users =>{
         if(users[0]){
-            res.json({msg : "login successful"})
+            const user = users[0];
+            if(user.dataValues.password === password){
+                res.json({msg : "login successful"})
+            }else{
+                res.status(401).json({msg : "bad credentials"});
+            }
+            console.log(user.dataValues.password);
         }else{
-            res.status(400).json({msg : "bad credentials"});
+            res.status(404).json({msg : "user not found"});
         }
     })
     
