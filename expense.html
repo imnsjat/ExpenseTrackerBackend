@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <h1>Expense Tracker</h1>
+    <form id="expenseForm">
+      <div class="mb-3">
+        <label for="amount" class="form-label">Amount</label>
+        <input type="number" class="form-control" id="amount" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <input type="text" class="form-control" id="description" required>
+      </div>
+      <div class="mb-3">
+        <label for="category" class="form-label">Category</label>
+        <select class="form-select" id="category" required>
+          <option value="food">Food</option>
+          <option value="groceries">Groceries</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="utilities">Utilities</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <ul id="expenseList" class="mt-4 list-group"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      const expenseForm = document.getElementById('expenseForm');
+      const expenseList = document.getElementById('expenseList');
+      const API_BASE_URL = 'http://localhost:3000';
+
+      async function fetchExpenses() {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/expenses`);
+          const expenses = response.data;
+
+          expenseList.innerHTML = '';
+
+          expenses.forEach(expense => {
+            const li = createExpenseListItem(expense);
+            expenseList.appendChild(li);
+          });
+        } catch (error) {
+          console.error('Error fetching expenses:', error);
+        }
+      }
+
+      function createExpenseListItem(expense) {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+
+        const amountText = document.createTextNode(` ${expense.description}- rs.${expense.amount} (${expense.category})`);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('btn', 'btn-sm', 'btn-danger', 'float-end', 'deleteBtn');
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.classList.add('btn', 'btn-sm', 'btn-primary', 'float-end', 'editBtn');
+
+        li.appendChild(amountText);
+        li.appendChild(deleteBtn);
+        li.appendChild(editBtn);
+        
+
+        deleteBtn.addEventListener('click', async function () {
+          try {
+            await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+            li.remove();
+          } catch (error) {
+            console.error('Error deleting expense:', error);
+          }
+        });
+
+        editBtn.addEventListener('click', async function () {
+          document.getElementById('amount').value = expense.amount;
+          document.getElementById('description').value = expense.description;
+          document.getElementById('category').value = expense.category;
+          try {
+            await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+            li.remove();
+          } catch (error) {
+            console.error('Error deleting expense:', error);
+          }
+        });
+
+        return li;
+      }
+
+      expenseForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const amount = document.getElementById('amount').value;
+        const description = document.getElementById('description').value;
+        const category = document.getElementById('category').value;
+
+        const expense = {
+          amount,
+          description,
+          category
+        };
+
+        try {
+          await axios.post(`${API_BASE_URL}/expenses`, expense);
+          await fetchExpenses();
+        } catch (error) {
+          console.error('Error adding expense:', error);
+        }
+
+        expenseForm.reset();
+      });
+
+      fetchExpenses();
+
+    });
+
+  </script>
+</body>
+</html>

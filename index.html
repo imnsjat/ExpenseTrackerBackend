@@ -49,6 +49,9 @@
                 try {
                 const res = await axios.post(`${API_BASE_URL}/login`, data);
                 console.log(res);
+                if(res.status===200){
+                    window.location.href='/app';
+                }
                 
                 } catch (error) {
                 console.error('Error login:', error);
