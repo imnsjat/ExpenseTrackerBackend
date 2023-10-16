@@ -20,27 +20,48 @@
                 <label for="pwd">Password:</label>
                 <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pswd">
             </div>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
+            <button type="submit" id="actionbtn" class="btn btn-primary">Sign Up</button>
         </form>
+        <a href="#" id="toggleform">Switch to LOGIN</a>
     </div>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const API_BASE_URL = 'http://localhost:3000';
-        document.getElementById('form').addEventListener('submit', async function (event) {
+        let isSignUp = true;
+
+        document.getElementById('actionbtn').addEventListener('click', async function (event) {
             event.preventDefault();
             const data = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 password: document.getElementById('pwd').value,
             };
-            try {
+            if (isSignUp) {
+                try {
                 const res = await axios.post(`${API_BASE_URL}/signup`, data);
                 console.log(res);
                 
-            } catch (error) {
-                console.error('Error saving player:', error);
-            }
+                } catch (error) {
+                console.error('Error sign up:', error);
+                }
+            }else{
+                try {
+                const res = await axios.post(`${API_BASE_URL}/login`, data);
+                console.log(res);
+                
+                } catch (error) {
+                console.error('Error login:', error);
+                }
+            }    
+        });
+
+        document.getElementById('toggleform').addEventListener('click', function (event) {
+            event.preventDefault();
+            isSignUp = !isSignUp;
+            // document.getElementById('formTitle').textContent = isSignUp ? 'Sign Up' : 'Login';
+            document.getElementById('actionbtn').textContent = isSignUp ? 'Sign Up' : 'Login';
+            document.getElementById('toggleform').textContent = isSignUp ? 'Switch to Login' : 'Switch to Sign Up';
         });
     </script>
 </body>

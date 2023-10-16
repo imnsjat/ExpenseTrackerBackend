@@ -1,21 +1,43 @@
 const User = require('../models/user'); 
 const path = require('path');
 
+
+
 exports.home = (req,res,next)=>{
     res.sendFile(path.join(__dirname,  '../index.html'));
 }
 exports.signup = (req,res,next)=>{
     // console.log(req.body)
     const {name,email,password} = req.body ;
+    if(name.length === 0 || name  == null || password == null || email == null || email.length === 0 || password.length === 0){
+        res.status(400).json({err : "bad  parameters"})
+    }
     User.findAll({where: {email:email}})
     .then(users =>{
         if(users[0]){
             res.json({"fialed" : "user exists"})
         }else{
             User.create({name:name , email : email , password : password})
-            .then(()=> res.json({"success": " snfsj"}))
+            .then(()=> res.status(201).json({message : 'signed up successfully'}))
         }
     })
     
-    .catch(err=>console.log(err));
+    .catch(err=>res.status(403).json(err));
+}
+
+exports.login = (req,res,next)=>{
+    const {name,email,password} = req.body ;
+    if(name.length === 0 || name  == null || password == null || email == null || email.length === 0 || password.length === 0){
+        res.status(400).json({err : "bad  parameters"})
+    }
+    User.findAll({where: {email:email , password:password}})
+    .then(users =>{
+        if(users[0]){
+            res.json({msg : "login successful"})
+        }else{
+            res.status(400).json({msg : "bad credentials"});
+        }
+    })
+    
+    .catch(err=>res.status(403).json(err));
 }
