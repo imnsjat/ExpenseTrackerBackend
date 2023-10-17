@@ -39,10 +39,11 @@
       const expenseForm = document.getElementById('expenseForm');
       const expenseList = document.getElementById('expenseList');
       const API_BASE_URL = 'http://localhost:3000';
+      const token = localStorage.getItem('token');
 
       async function fetchExpenses() {
         try {
-          const response = await axios.get(`${API_BASE_URL}/expenses`);
+          const response = await axios.get(`${API_BASE_URL}/expenses`,{headers: {'Authorization': token}});
           const expenses = response.data;
 
           expenseList.innerHTML = '';
@@ -77,7 +78,7 @@
 
         deleteBtn.addEventListener('click', async function () {
           try {
-            await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+            await axios.post(`${API_BASE_URL}/deleteexpense`,expense , {headers: {'Authorization': token}});
             li.remove();
           } catch (error) {
             console.error('Error deleting expense:', error);
@@ -89,7 +90,7 @@
           document.getElementById('description').value = expense.description;
           document.getElementById('category').value = expense.category;
           try {
-            await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+            await axios.post(`${API_BASE_URL}/deleteexpense`,expense ,  {headers: {'Authorization': token}});
             li.remove();
           } catch (error) {
             console.error('Error deleting expense:', error);
@@ -113,7 +114,7 @@
         };
 
         try {
-          await axios.post(`${API_BASE_URL}/expenses`, expense);
+          await axios.post(`${API_BASE_URL}/expenses`, expense,{headers: {'Authorization': token}} );
           await fetchExpenses();
         } catch (error) {
           console.error('Error adding expense:', error);
