@@ -8,7 +8,8 @@
 </head>
 <body>
   <div class="container mt-4">
-    <h1>Expense Tracker</h1>
+    <div class="nav "><h1 class="nav-item m-auto ">Expense Tracker</h1> 
+    <button class = "btn btn-danger nav-item " id="premium">Buy Premium</button></div>
     <form id="expenseForm">
       <div class="mb-3">
         <label for="amount" class="form-label">Amount</label>
@@ -34,6 +35,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', function () {
       const expenseForm = document.getElementById('expenseForm');
@@ -126,6 +128,39 @@
       fetchExpenses();
 
     });
+
+    const premiumbtn = document.getElementById('premium');
+    premiumbtn.addEventListener('click', async function (event) {
+      // console.log('premium activated');
+      const token = localStorage.getItem('token')
+      const  response = await axios.get('http://localhost:3000/purchase/premium',{headers: {'Authorization': token}});
+      console.log(response);
+      var options = 
+      {
+        "key": response.data.key_id ,
+        "order_id":response.data.order.id ,
+        "handler": async function (response) {
+          await axios.post('http://localhost:3000/purchase/updatetransactionstatus',{
+              order_id : options.order_id ,
+              payment_id : response.razorpay_payment_id,
+          } ,{headers: {'Authorization': token}} );
+          alert('Premium activated successfully !')
+        }
+      };
+      const rzp1= new Razorpay(options);
+      rzp1.open();
+      event.preventDefault();
+      rzp1.on('payment.failed',async function (response){
+        console.log(response);
+        const res = await axios.post('http://localhost:3000/purchase/updatetransactionfail',{
+              order_id : options.order_id 
+          } ,{headers: {'Authorization': token}} );
+        console.log(res);
+        alert('Something went wrong !!')
+      })
+
+    });
+
 
   </script>
 </body>
