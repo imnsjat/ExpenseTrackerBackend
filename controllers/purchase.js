@@ -1,5 +1,6 @@
 const razorpay =require('razorpay');
 const Order = require('../models/orders');
+const jwt = require('jsonwebtoken');
 
 exports.purchasepremium = async (req,res,next)=>{
     try{

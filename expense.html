@@ -66,7 +66,7 @@
         LeaderboardEle.innerHTML += '<h3 class="m-3"> Leaderboard: </h3>' ;
         userLeaderboardArray.data.forEach((userDetails)=>{
           // console.log(userDetails);
-          LeaderboardEle.innerHTML += `<li class="m-auto"> Name: - ${userDetails.name} Total Expenses: ${userDetails.total_cost} </li>` ;
+          LeaderboardEle.innerHTML += `<li class="m-auto"> Name: - ${userDetails.name} Total Expenses: ${userDetails.totalexpenses} </li>` ;
         })
         
       }
@@ -182,11 +182,15 @@
         "key": response.data.key_id ,
         "order_id":response.data.order.id ,
         "handler": async function (response) {
-          await axios.post('http://localhost:3000/purchase/updatetransactionstatus',{
+          const res = await axios.post('http://localhost:3000/purchase/updatetransactionstatus',{
               order_id : options.order_id ,
               payment_id : response.razorpay_payment_id,
           } ,{headers: {'Authorization': token}} );
-          alert('Premium activated successfully !')
+          premiumbtn.style.display = 'none';
+        document.getElementById('msg').innerHTML = " you are a premium user";
+        await localStorage.setItem('token',res.data.token);
+        showLeaderboard();
+        alert('Premium activated successfully !')
         }
       };
       const rzp1= new Razorpay(options);
@@ -199,10 +203,7 @@
           } ,{headers: {'Authorization': token}} );
         console.log(res);
         alert('Something went wrong !!')
-        premiumbtn.style.display = 'none';
-        document.getElementById('msg').innerHTML = " you are a premium user";
-        localStorage.setItem('token',res.data.token);
-        showLeaderboard();
+        
       })
 
     });

@@ -1,4 +1,5 @@
 const Expense = require('../models/expenses');
+const User = require('../models/user')
 
 const path = require('path');
 
@@ -12,8 +13,21 @@ exports.postExpense =(req,res,next)=>{
     const description = req.body.description;
     const category = req.body.category;
     Expense.create({amount : amount , description : description , category : category , userId : userId})
-    .then((data)=>res.json(data))
-    .catch(err=>console.log(err));
+    .then((expense)=>{
+        const totalExpense = Number(req.user.totalexpenses) + Number(amount) ;
+        User.update({totalexpenses : totalExpense } , { where : { id : req.user.id}}).then(()=>{
+            res.status(200).json({expense:expense})
+        }).catch(err=>{
+            throw new Error(err);
+        })
+    })
+    .catch(err => {
+        throw new Error(err);
+    })
+    .catch(err=>{
+        console.log(err);
+        return res.status(500).json({success:false , error : err});
+    });
 }
 
 exports.getExpense = (req,res,next)=>{

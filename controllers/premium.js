@@ -5,11 +5,14 @@ const sequelize = require('../util/database')
 exports.showleaderboard = async (req,res,next)=>{
     try{
         // console.log('chalalalalla')
-        const expenses = await User.findAll({ attributes : ['id','name' , [sequelize.fn('sum', sequelize.col('expenses.amount')) , 'total_cost']] ,
-                                        include : [{model : Expense , attributes : []}] ,
-                                        group : ['user.id'],
-                                        order : [[sequelize.col("total_cost") , "DESC"]]
-                                        });
+            const expenses = await User.findAll ({ attributes: ['name' , 'totalexpenses' ] ,
+                                                    order : [['totalexpenses' , "DESC"]]
+                                                    });
+        // const expenses = await User.findAll({ attributes : ['id','name' , [sequelize.fn('sum', sequelize.col('expenses.amount')) , 'total_cost']] ,
+        //                                 include : [{model : Expense , attributes : []}] ,
+        //                                 group : ['user.id'],
+        //                                 order : [[sequelize.col("total_cost") , "DESC"]]
+        //                                 });
         // const userAggregatedExpenses = {};
         // expenses.forEach((expense)=>{
         //     // console.log(expense.dataValues);
