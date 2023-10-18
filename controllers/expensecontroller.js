@@ -2,32 +2,31 @@ const Expense = require('../models/expenses');
 const User = require('../models/user')
 
 const path = require('path');
+const sequelize = require('../util/database');
 
 exports.app = (req,res,next)=>{
     res.sendFile(path.join(__dirname,  '../expense.html'));
 }
 
-exports.postExpense =(req,res,next)=>{
+exports.postExpense =async (req,res,next)=>{
+    const t = await  sequelize.transaction();
+    try{
     const userId = req.user.id ; 
     const amount = req.body.amount;
     const description = req.body.description;
     const category = req.body.category;
-    Expense.create({amount : amount , description : description , category : category , userId : userId})
-    .then((expense)=>{
-        const totalExpense = Number(req.user.totalexpenses) + Number(amount) ;
-        User.update({totalexpenses : totalExpense } , { where : { id : req.user.id}}).then(()=>{
-            res.status(200).json({expense:expense})
-        }).catch(err=>{
-            throw new Error(err);
-        })
-    })
-    .catch(err => {
-        throw new Error(err);
-    })
-    .catch(err=>{
+
+    const expense = await Expense.create({amount : amount , description : description , category : category , userId : userId} , {transaction : t});
+    const totalExpense = Number(req.user.totalexpenses) + Number(amount) ;
+    await User.update({totalexpenses : totalExpense } , { where : { id : req.user.id} , transaction : t })
+    t.commit();
+    res.status(200).json({expense:expense})
+    }
+    catch(err){
+        await t.rollback();
         console.log(err);
         return res.status(500).json({success:false , error : err});
-    });
+    };
 }
 
 exports.getExpense = (req,res,next)=>{
@@ -40,13 +39,22 @@ exports.getExpense = (req,res,next)=>{
     .catch()
 }
 
-exports.deleteExpense=(req,res,next)=>{
-    const expid =req.body.id;
-    Expense.findAll({where :{id:expid , userId : req.user.id}})
-    .then( expense =>{
-        return expense[0].destroy();
+exports.deleteExpense=async (req,res,next)=>{
+    
+    const t = await  sequelize.transaction();
+    try{
+        const expid =req.body.id;
+        const expense = await Expense.findAll({where :{id:expid , userId : req.user.id}, transaction : t });
+        // console.log(expense[0]);
+        const totalExpense = Number(req.user.totalexpenses) - Number(expense[0].amount) ;
+        await User.update({totalexpenses : totalExpense } , { where : { id : req.user.id} , transaction : t })
+        await expense[0].destroy();
+        res.status(200).json({expense:expense})
+
+    }catch(err){ 
+        await t.rollback();
+        console.log(err);
+        return res.status(500).json({success:false , error : err});
     }
-    ).then((data)=>res.json(data))
-    .catch(err=>console.log(err))
 
 }
