@@ -21,6 +21,7 @@
                 <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pswd">
             </div>
             <button type="submit" id="actionbtn" class="btn btn-primary">Sign Up</button>
+            <button  id="forgotbtn" class="btn btn-outline-secondary">Forgot Password</button>
         </form>
         <a href="#" id="toggleform">Switch to LOGIN</a>
     </div>
@@ -58,6 +59,11 @@
                 console.error('Error login:', error);
                 }
             }    
+        });
+
+        document.getElementById('forgotbtn').addEventListener('click', async function (event) {
+            event.preventDefault();
+            window.location.href='/forgotpassword';  
         });
 
         document.getElementById('toggleform').addEventListener('click', function (event) {
