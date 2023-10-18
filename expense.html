@@ -11,12 +11,15 @@
     <div class="nav "><h1 class="nav-item m-auto ">Expense Tracker</h1> 
     <button class = "btn btn-danger nav-item " id="premium">Buy Premium</button>
     <div id="msg" class=" highlighted text-light-emphasis text-capitalize "></div>
+    <input type="button" class="m-auto" value="Show Leaderboard" id="leadbtn" style="display: none;">
+    <div id="leaderboard" class="m-auto"></div>
   </div>
 
     <form id="expenseForm">
       <div class="mb-3">
         <label for="amount" class="form-label">Amount</label>
         <input type="number" class="form-control" id="amount" required>
+        <li class="m-auto"></li>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
@@ -32,7 +35,7 @@
           <option value="other">Other</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button type="submit" class="  btn btn-primary">Submit</button>
     </form>
     <ul id="expenseList" class="mt-4 list-group"></ul>
   </div>
@@ -50,6 +53,25 @@
     return JSON.parse(jsonPayload);
     }
 
+    function showLeaderboard (){
+      console.log('called');
+      const inputElement = document.getElementById('leadbtn');
+      inputElement.style.display = 'block' ;
+      inputElement.onclick = async ()=>{
+        const token = localStorage.getItem('token');
+        const userLeaderboardArray = await axios.get('http://localhost:3000/premium/showleaderboard',{headers: {'Authorization': token}});
+        console.log(userLeaderboardArray);
+        var LeaderboardEle = document.getElementById('leaderboard');
+        LeaderboardEle.innerHTML = '';
+        LeaderboardEle.innerHTML += '<h3 class="m-3"> Leaderboard: </h3>' ;
+        userLeaderboardArray.data.forEach((userDetails)=>{
+          // console.log(userDetails);
+          LeaderboardEle.innerHTML += `<li class="m-auto"> Name: - ${userDetails.name} Total Expenses: ${userDetails.total_cost} </li>` ;
+        })
+        
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function () {
       const expenseForm = document.getElementById('expenseForm');
       const expenseList = document.getElementById('expenseList');
@@ -60,6 +82,7 @@
       if(decodedtoken.ispremiumuser){
         premiumbtn.style.display = 'none';
         document.getElementById('msg').innerHTML = " you are a premium user";
+        showLeaderboard();
       }
 
       async function fetchExpenses() {
@@ -178,7 +201,8 @@
         alert('Something went wrong !!')
         premiumbtn.style.display = 'none';
         document.getElementById('msg').innerHTML = " you are a premium user";
-
+        localStorage.setItem('token',res.data.token);
+        showLeaderboard();
       })
 
     });
