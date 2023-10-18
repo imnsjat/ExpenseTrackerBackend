@@ -47,8 +47,10 @@ exports.deleteExpense=async (req,res,next)=>{
         const expense = await Expense.findAll({where :{id:expid , userId : req.user.id}, transaction : t });
         // console.log(expense[0]);
         const totalExpense = Number(req.user.totalexpenses) - Number(expense[0].amount) ;
-        await User.update({totalexpenses : totalExpense } , { where : { id : req.user.id} , transaction : t })
+        const user = await User.findOne({where : {id: req.user.id} , transaction : t})
+        await user.update({totalexpenses : totalExpense }  , {transaction : t })
         await expense[0].destroy();
+        await t.commit();
         res.status(200).json({expense:expense})
 
     }catch(err){ 
