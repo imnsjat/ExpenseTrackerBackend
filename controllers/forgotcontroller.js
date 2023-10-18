@@ -49,6 +49,7 @@ exports.resetpassword = async(req,res,next)=>{
     const uuid = req.params.uuid ;
     const  forgotpasswords = await ForGotPassword.findAll({where :{ uuid : uuid , isActive : true}});
     if(forgotpasswords[0]){
+        await forgotpasswords[0].update({ isActive: false});
         res.sendFile(path.join(__dirname,  '../resetpassword.html'));
     }else{
         res.status(400).json({message : 'invalid request'})
