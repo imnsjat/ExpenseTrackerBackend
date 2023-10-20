@@ -39,6 +39,7 @@
       <button type="submit" class="  btn btn-primary">Submit</button>
     </form>
     <ul id="expenseList" class="mt-4 list-group"></ul>
+    <div id="pagination-button"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -96,6 +97,7 @@
     });
 }
 
+
     window.addEventListener('DOMContentLoaded', function () {
       const expenseForm = document.getElementById('expenseForm');
       const expenseList = document.getElementById('expenseList');
@@ -109,10 +111,18 @@
         showLeaderboard();
       }
 
+      const page = document.getElementById('pagination-button');
+
       async function fetchExpenses() {
         try {
-          const response = await axios.get(`${API_BASE_URL}/expenses`,{headers: {'Authorization': token}});
-          const expenses = response.data;
+          const res = await axios.get(`${API_BASE_URL}/expenses?page=1`,{headers: {'Authorization': token}});
+          console.log('response' , res)
+          const expenses = res.data.result;
+
+          if (expenses.length === 0) {
+            alert('No data found')
+            return;
+        }
 
           expenseList.innerHTML = '';
 
@@ -120,6 +130,34 @@
             const li = createExpenseListItem(expense);
             expenseList.appendChild(li);
           });
+
+          const next = document.createElement('button');
+        const prev = document.createElement('button');
+        console.log(res.data.prev + ' - ' + res.data.nextv, 'next button')
+        console.log(res.data.nex, "HUU", res.data.pre);
+
+        if (res.data.nex === true) {
+            // 
+            next.textContent = `Go to Page :${res.data.nextv}`
+            next.classList = 'pagination'
+            next.value = `${res.data.nextv}`
+            next.addEventListener('click', getexpenseList)
+            document.getElementById('pagination-button').appendChild(next)
+            // document.querySelectorAll('.pagination').style.display='inline-block'
+        }
+        if (res.data.pre === true) {
+            prev.textContent = `Go to Page :${res.data.prev}`
+            prev.value = `${res.data.prev}`
+            prev.classList = 'pagination'
+            prev.addEventListener('click', getexpenseList)
+            document.getElementById('pagination-button').appendChild(prev)
+        }
+        const paginationButtons = document.querySelectorAll('.pagination');
+        paginationButtons.forEach((button) => {
+            button.style.display = 'inline-block';
+        });
+
+
         } catch (error) {
           console.error('Error fetching expenses:', error);
         }
@@ -190,6 +228,69 @@
 
         expenseForm.reset();
       });
+      function getexpenseList(event) {
+  
+  const token = localStorage.getItem('token');
+  const expenseList = document.getElementById('expenseList');
+    const headers = {
+        'Authorization': localStorage.getItem('token'),
+    };
+    const p = document.getElementById('pagination-button')
+
+    while (p.firstChild) {
+        p.removeChild(p.firstChild);
+    }
+    const page = event.target.value
+    console.log(page, 'PAGE --->>>>>>>>>>>>>>>');
+    axios.get(`http://localhost:3000/expenses?page=${page}`,{headers: {'Authorization': token}})
+        .then((res) => {
+
+            const expenses = res.data.result;
+
+          if (expenses.length === 0) {
+            alert('No data found')
+            return;
+        }
+
+          expenseList.innerHTML = '';
+
+          expenses.forEach(expense => {
+            const li = createExpenseListItem(expense);
+            expenseList.appendChild(li);
+          });
+
+            const next = document.createElement('button');
+            const prev = document.createElement('button');
+            console.log(res.data.prev + ' - ' + res.data.nextv)
+
+            if (res.data.pre === true) {
+                console.log('hiiii');
+                prev.textContent = `Go to Page :${res.data.prev}`
+                prev.value = `${res.data.prev}`
+                prev.classList = 'pagination'
+                prev.addEventListener('click', getexpenseList)
+                document.getElementById('pagination-button').appendChild(prev)
+                // document.querySelectorAll('.pagination').style.display='inline-block'
+            }
+            if (res.data.nex === true) {
+                // 
+                next.textContent = `Go to Page :${res.data.nextv}`
+                next.classList = 'pagination'
+                next.value = `${res.data.nextv}`
+                next.addEventListener('click', getexpenseList)
+                document.getElementById('pagination-button').appendChild(next)
+                // document.querySelectorAll('.pagination').style.display='inline-block'
+            }
+
+
+            const paginationButtons = document.querySelectorAll('.pagination');
+            paginationButtons.forEach((button) => {
+                button.style.display = 'inline-block';
+            });
+
+        })
+        .catch(err => console.log(err))
+}
 
       fetchExpenses();
 

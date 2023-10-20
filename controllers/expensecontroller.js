@@ -29,14 +29,66 @@ exports.postExpense =async (req,res,next)=>{
     };
 }
 
+async function nextt(id, offset, itemsParPage) {
+    try {
+        const result = await Expense.findAll({
+            where: { UserId: id },
+            limit: itemsParPage,
+            offset: offset
+        })
+
+        if (result.length > 0) {
+            // console.log(result);
+            return true;
+        }
+        // console.log(false);
+        return false;
+    }
+    catch (err) {
+        console.log(err);
+        return false;
+    }
+}
+
 exports.getExpense = (req,res,next)=>{
 
-    Expense.findAll({where : {userId : req.user.id}})
-    .then((expenses)=>{
-        // console.log('fetched' , expenses  );
-        res.json(expenses);
+    // Expense.findAll({where : {userId : req.user.id}})
+    // .then((expenses)=>{
+    //     // console.log('fetched' , expenses  );
+    //     res.json(expenses);
+    // })
+    // .catch()
+    const itemsParPage = 2;
+    const of = ((req.query.page || 1) - 1);
+    console.log(of, '63 PER OFF HAI ');
+    Expense.findAll({
+        where: { userId: req.user.id },
+        offset: of * itemsParPage,
+        limit: itemsParPage
     })
-    .catch()
+        .then(async result => {
+            let pre; let nex; let prev; let nextv;
+            if (of === 0) {
+                pre = false;
+            } else {
+                pre = true;
+                prev = of;
+            }
+            const ans = await nextt(req.user.id, (of + 1) * itemsParPage, itemsParPage);
+            if (ans === true) {
+                nex = true;
+                nextv = Number(of) + Number(2);
+            } else {
+                nex = false;
+            }
+            console.log(prev, 'PREVIOUSBUTTON');
+            console.log(pre, 'PREBUTTON');
+            // console.log(nex, 'nexIOUSBUTTON');
+            // console.log(nextv, 'nextvOUSBUTTON');
+            // console.log(result, 'resuyltyBUTTON');
+            console.log(result,'RESULT IN BUTTONS OF GET');
+            res.json({ result, pre, nex, nextv, prev })
+        }).catch(err=> console.log(err));
 }
 
 exports.deleteExpense=async (req,res,next)=>{
