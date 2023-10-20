@@ -1,6 +1,6 @@
 require('dotenv').config()
 const express = require('express');
-
+const fs = require('fs');
 const cors = require('cors');
 
 const sequelize = require('./util/database');
@@ -14,12 +14,17 @@ const Order = require('./models/orders');
 const Expenses = require('./models/expenses');
 const forGotPassword = require('./models/forgotpassword');
 const DownloadedFile = require('./models/download');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 
+const accessLogStream = fs.createWriteStream(path.join(__dirname , 'access.log'),{flags:'a'});
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(helmet());
+app.use(morgan('combined' , {stream : accessLogStream}));
 
 app.use(authroutes);
 app.use(forgotpasswordroutes);
@@ -38,7 +43,7 @@ DownloadedFile.belongsTo(User);
 
 sequelize.sync()
 .then(()=>{
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
 })
 .catch(err=> console.log(err));
 
