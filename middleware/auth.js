@@ -22,3 +22,13 @@ exports.authenticate = (req,res,next)=>{
         return res.status(401).json({success:false})
     }
 }
+
+exports.checkpremium =( req,res,next)=>{
+    const ispremiumuser = req.user.ispremiumuser ;
+    if(!ispremiumuser){
+        return res.status(400).json({message : 'Buy Premium'});
+    }else{
+        next();
+    }
+
+}

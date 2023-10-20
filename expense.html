@@ -20,7 +20,7 @@
       <div class="mb-3">
         <label for="amount" class="form-label">Amount</label>
         <input type="number" class="form-control" id="amount" required>
-        <li class="m-auto"></li>
+        <li class="m-auto list-unstyled"></li>
       </div>
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
@@ -72,6 +72,29 @@
         
       }
     }
+
+    function download(){
+    const token = localStorage.getItem('token');
+    axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
+    .then((response) => {
+      console.log('response' , response)
+        if(response.status === 200){
+            var a = document.createElement("a");
+            a.href = response.data.fileUrl;
+            a.download = 'myexpense.csv';
+            a.click();
+        } else {
+            throw new Error(response.data.message)
+        }
+
+    })
+    .catch((err) => {
+      if(err.response && err.response.status === 400){
+            alert('buy premium');
+        }
+        console.log(err);
+    });
+}
 
     window.addEventListener('DOMContentLoaded', function () {
       const expenseForm = document.getElementById('expenseForm');
