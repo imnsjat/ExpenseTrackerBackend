@@ -58,9 +58,10 @@ exports.getExpense = (req,res,next)=>{
     //     res.json(expenses);
     // })
     // .catch()
-    const itemsParPage = 2;
+    // const itemsParPage = 2;
+    const itemsParPage = Number(req.headers.items);
     const of = ((req.query.page || 1) - 1);
-    console.log(of, '63 PER OFF HAI ');
+    // console.log(of, '63 PER OFF HAI ');
     Expense.findAll({
         where: { userId: req.user.id },
         offset: of * itemsParPage,
@@ -81,12 +82,12 @@ exports.getExpense = (req,res,next)=>{
             } else {
                 nex = false;
             }
-            console.log(prev, 'PREVIOUSBUTTON');
-            console.log(pre, 'PREBUTTON');
+            // console.log(prev, 'PREVIOUSBUTTON');
+            // console.log(pre, 'PREBUTTON');
             // console.log(nex, 'nexIOUSBUTTON');
             // console.log(nextv, 'nextvOUSBUTTON');
             // console.log(result, 'resuyltyBUTTON');
-            console.log(result,'RESULT IN BUTTONS OF GET');
+            // console.log(result,'RESULT IN BUTTONS OF GET');
             res.json({ result, pre, nex, nextv, prev })
         }).catch(err=> console.log(err));
 }

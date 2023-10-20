@@ -8,4 +8,6 @@ router.get('/premium/showleaderboard', authmiddleware.authenticate ,premiumContr
 
 router.get('/user/download', authmiddleware.authenticate , authmiddleware.checkpremium ,premiumController.download);
 
+router.get('/expense/download/allurl',authmiddleware.authenticate ,authmiddleware.checkpremium , premiumController.allUrl)
+
 module.exports = router ;
