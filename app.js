@@ -3,6 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 
+const path = require('path');
 const sequelize = require('./util/database');
 const authroutes = require('./routes/authroutes');
 const forgotpasswordroutes = require('./routes/forgotpassword');
@@ -23,7 +24,7 @@ const accessLogStream = fs.createWriteStream(path.join(__dirname , 'access.log')
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(helmet());
+// app.use(helmet());
 app.use(morgan('combined' , {stream : accessLogStream}));
 
 app.use(authroutes);
