@@ -15,8 +15,8 @@ exports.signup = async (req,res,next)=>{
         if(name.length === 0 || name  == null || password == null || email == null || email.length === 0 || password.length === 0){
             res.status(400).json({err : "bad  parameters"})
         }
-        const users = await User.findAll({where: {email:email}});
-        if(users[0]){
+        const user = await User.findOne({email:email});
+        if(user){
                 res.status(403).json({"failed" : "user exists"})
         }else{
                 bcrypt.hash(password , 10 , async ( err , hash)=>{
@@ -34,18 +34,18 @@ exports.signup = async (req,res,next)=>{
 }
 
 exports.login = async (req,res,next)=>{
-    try{
-        const {name,email,password} = req.body ;
+    try{console.log(req.body)   
+        const {email,password} = req.body ;
         if( password == null || email == null || email.length === 0 || password.length === 0){
             res.status(400).json({err : "bad  parameters"})
         }
-        const users = await User.findAll({where: {email:email }});
+        const user = await User.findOne({email:email});
+        console.log(user)
         
-        if(users[0]){
-            const user = users[0];
-            bcrypt.compare(password,user.dataValues.password , async  (err, response )=>{
+        if(user){
+            bcrypt.compare(password,user.password , async  (err, response )=>{
                 if(response == true){
-                    const token =  await jwt.sign({ id: user.dataValues.id , ispremiumuser : user.dataValues.ispremiumuser }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+                    const token =  await jwt.sign({ id: user.id , ispremiumuser : user.ispremiumuser }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
                     res.status(200).json({
                         message: 'Login successful',
                         user: { username: req.body.username  },

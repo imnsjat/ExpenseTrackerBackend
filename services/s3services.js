@@ -1,8 +1,5 @@
-const User = require('../models/user')
-const Expense = require('../models/expenses')
-const sequelize = require('../util/database')
+
 const AWS =require('aws-sdk');
-const UserServices = require('../services/userservices');
 
 exports.uploadtoS3 = (data , filename )=>{
     const BUCKET_NAME = 'expenseapptracking'

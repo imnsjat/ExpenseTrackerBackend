@@ -1,18 +1,13 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { NUMBER } = require('sequelize');
 
 exports.authenticate = (req,res,next)=>{
     try{
         const token = req.header('Authorization');
-        // console.log('tokenrcvd' , token);
-        const user = jwt.verify(token ,'Th1s1sJATSecr3tKey!' );
-        const userid = user.id;
-        console.log('user id : ', userid);
-        User.findByPk(userid).then(
+        const decodedUser = jwt.verify(token ,process.env.TOKEN_SECRET );
+        const userid = decodedUser.id;
+        User.findById(userid).then(
             user=>{
-
-                // console.log('user verified' , JSON.stringify(user));
                 req.user=user;
                 next();
             }
@@ -23,12 +18,3 @@ exports.authenticate = (req,res,next)=>{
     }
 }
 
-exports.checkpremium =( req,res,next)=>{
-    const ispremiumuser = req.user.ispremiumuser ;
-    if(!ispremiumuser){
-        return res.status(400).json({message : 'Buy Premium'});
-    }else{
-        next();
-    }
-
-}
